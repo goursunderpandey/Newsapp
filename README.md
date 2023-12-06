@@ -10,6 +10,14 @@ email : anup@gmail.com
 password : 123456
 ```
 
+stack are using in App 
+```bash
+Frontend : React
+State management : Usecontext
+Authentication : Firebase
+Ui : Bootstrap 
+```
+
 use app locally use this command 
 
 ```bash
