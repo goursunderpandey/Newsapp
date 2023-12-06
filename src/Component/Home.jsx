@@ -1,4 +1,3 @@
-// Import necessary dependencies
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { NavLink } from "react-router-dom"
