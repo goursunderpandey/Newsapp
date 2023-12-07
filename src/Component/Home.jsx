@@ -9,12 +9,10 @@ const Home = () => {
   const [news, setNews] = useState([]);
   const [visibleNews, setVisibleNews] = useState(6);
   const [isGridView, setIsGridView] = useState(false);
-  const { user ,newsData ,setSelectedArticle , selectedArticle } = useContext(Authcontext);
-  const [favorites, setFavorites] = useState([]);
+  const { user ,newsData ,setSelectedArticle , selectedArticle ,favorites,setFavorites } = useContext(Authcontext);
   const navigate = useNavigate(); 
 
   const getData = async () => {
-    // Assuming you are fetching data asynchronously from the context
     const fetchedData = await newsData;
     setNews(fetchedData);
   };
@@ -132,8 +130,6 @@ const Home = () => {
           )}
           {selectedArticle && (
             <ArticleDetail
-              article={selectedArticle}
-              onClose={handleArticleDetailClose}
             />
           )}
         </>

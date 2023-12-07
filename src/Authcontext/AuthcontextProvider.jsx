@@ -8,6 +8,7 @@ const AuthcontextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [newsData, setNewsData] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     const unsubscribe = Auth.onAuthStateChanged((user) => {
@@ -34,6 +35,7 @@ const AuthcontextProvider = ({ children }) => {
   const value = {
     user,
     newsData,
+    favorites,setFavorites,
     selectedArticle,
     setSelectedArticle,
     signUp: (name, email, password) => {

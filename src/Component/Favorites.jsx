@@ -1,34 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, onSnapshot } from 'firebase/firestore';
-import { Auth } from '../firebase/Firebaseconfig';
+import React, { useContext } from 'react';
+import Authcontext from '../Authcontext/Authcontext';
 
 const Favorites = () => {
-  const [favorites, setFavorites] = useState([]);
-  const db = getFirestore();
-  const user = Auth.currentUser;
-
-  useEffect(() => {
-    if (user) {
-      const favoritesRef = collection(db, `users/${user.uid}/favorites`);
-      const favoritesQuery = query(favoritesRef);
-
-      const unsubscribe = onSnapshot(favoritesQuery, (snapshot) => {
-        const favoritesData = snapshot.docs.map((doc) => doc.data()); // Corrected line
-        setFavorites(favoritesData);
-      });
-
-      return () => unsubscribe();
-    }
-  }, [user]);
+  const { favorites } = useContext(Authcontext);
 
   return (
     <div>
       <h2>Favorites</h2>
-      <ul>
+      <div className="row">
         {favorites.map((favorite) => (
-          <li key={favorite.title}>{favorite.title}</li>
+          <div className="col-md-4" key={favorite.title}>
+            <div className="card mb-4 shadow-sm">
+              <img
+                src={favorite.urlToImage}
+                className="card-img-top"
+                alt={favorite.title}
+              />
+              <div className="card-body">
+                <h5 className="card-title">{favorite.title}</h5>
+                <p className="card-text">{favorite.description}</p>
+                <p>{favorite.content}</p>
+              </div>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
