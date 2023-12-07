@@ -1,35 +1,24 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faToggleOn, faToggleOff, faHeart } from '@fortawesome/free-solid-svg-icons';
 import Authcontext from '../Authcontext/Authcontext';
+import ArticleDetail from './Newsdetiles';
 
 const Home = () => {
   const [news, setNews] = useState([]);
   const [visibleNews, setVisibleNews] = useState(6);
   const [isGridView, setIsGridView] = useState(false);
-  const { user } = useContext(Authcontext);
+  const { user ,newsData ,setSelectedArticle , selectedArticle } = useContext(Authcontext);
   const [favorites, setFavorites] = useState([]);
- 
+  const navigate = useNavigate(); 
 
   const getData = async () => {
-    try {
-      const response = await axios.get(
-        'https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=2a2b8eb5b2e74194a7d60cbff09919b7'
-      );
-
-      localStorage.setItem('cachedNews', JSON.stringify(response.data.articles));
-      setNews(response.data.articles);
-    } catch (error) {
-      console.error(error);
-
-      const cachedData = localStorage.getItem('cachedNews');
-      if (cachedData) {
-        setNews(JSON.parse(cachedData));
-      }
-    }
+    // Assuming you are fetching data asynchronously from the context
+    const fetchedData = await newsData;
+    setNews(fetchedData);
   };
+  
 
   useEffect(() => {
     getData();
@@ -43,24 +32,40 @@ const Home = () => {
     setIsGridView((prevIsGridView) => !prevIsGridView);
   };
 
-  const handleFavoriteToggle = () => {
-   
-  }
+  const handleFavoriteToggle = (newsItem) => {
+    const isFavorite = favorites.some((fav) => fav.title === newsItem.title);
 
+    if (isFavorite) {
+      setFavorites((prevFavorites) =>
+        prevFavorites.filter((fav) => fav.title !== newsItem.title)
+      );
+    } else {
+      setFavorites((prevFavorites) => [...prevFavorites, newsItem]);
+    }
+  };
+
+  const handleArticleClick = (article) => {
+    setSelectedArticle(article);
+    navigate('/news');
+  };
+
+  const handleArticleDetailClose = () => {
+    setSelectedArticle(null);
+  };
 
   return (
-    !user ? (
-      <div className="container mt-5">
+    <div className="container mt-5">
+      {!user ? (
         <div className="row justify-content-center">
           <div className="col-md-6 text-center">
             <p className="lead">Please log in to view the content.</p>
-            <NavLink className="btn btn-primary" to="/login">Login</NavLink>
+            <NavLink className="btn btn-primary" to="/login">
+              Login
+            </NavLink>
           </div>
         </div>
-      </div>
-    ) : (
-      <>
-        <div className="container mt-5">
+      ) : (
+        <>
           <div className="row">
             <div className="col-md-12 mb-3 text-right">
               <button className="btn btn-primary-outline " onClick={handleToggleView}>
@@ -77,6 +82,8 @@ const Home = () => {
               <div
                 className={`${isGridView ? 'col-md-4 mb-4' : 'col-md-12 mb-4'}`}
                 key={newsItem.title}
+                onClick={() => handleArticleClick(newsItem)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className={`card ${isGridView ? 'h-100' : ''}`}>
                   <div className="position-relative">
@@ -93,28 +100,24 @@ const Home = () => {
                     <p className={`card-text ${isGridView ? 'text-truncate' : ''}`}>
                       {newsItem.description}
                     </p>
-                    <p className="card-text">
-                      <small className="text-muted">Published At: {newsItem.publishedAt}</small>
-                    </p>
-                    <a href={newsItem.url} target="_blank" rel="noopener noreferrer">
-                      Read more
-                    </a>
-                    {user ? (<>
+                    {user && (
                       <button
                         className="btn btn-link"
-                        onClick={() => handleFavoriteToggle(newsItem)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFavoriteToggle(newsItem);
+                        }}
                       >
                         <FontAwesomeIcon
                           icon={faHeart}
                           style={{
-                            color: favorites.some((fav) => newsItem.title === newsItem.title) ? 'red' : 'gray',
+                            color: favorites.some((fav) => newsItem.title === fav.title)
+                              ? 'red'
+                              : 'gray',
                           }}
                         />
                       </button>
-
-                    </>) : null}
-
-
+                    )}
                   </div>
                 </div>
               </div>
@@ -127,9 +130,15 @@ const Home = () => {
               </button>
             </div>
           )}
-        </div>
-      </>
-    )
+          {selectedArticle && (
+            <ArticleDetail
+              article={selectedArticle}
+              onClose={handleArticleDetailClose}
+            />
+          )}
+        </>
+      )}
+    </div>
   );
 };
 
